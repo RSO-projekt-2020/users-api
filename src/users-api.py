@@ -41,8 +41,7 @@ class User(db.Model):
     def check_password(self, password):
         return Bcrypt(app).check_password_hash(self.password_hash, password)
 
-    @staticmethod
-    def authenticate(password):
+    def authenticate(self, password):
         if self.check_password(password):
             token = {'exp': datetime.datetime.utcnow() + datetime.timedelta(days=30),
                     'iat' : datetime.datetime.utcnow(),
