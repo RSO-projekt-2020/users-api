@@ -33,7 +33,7 @@ class User(db.Model):
     email = db.Column(db.String)
     password_hash = db.Column(db.String)
     n_followers = db.Column(db.Integer)
-    n_following = db.Columns(db.Integer)
+    n_following = db.Column(db.Integer)
     created_on = db.Column(db.String)
 
     def __init__(self, email, password):
