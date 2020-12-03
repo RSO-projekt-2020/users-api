@@ -147,7 +147,9 @@ def login_user():
 def check_token():
     token = request.headers.get('Authorization')
     # checks if token is ok
-    return make_response({'msg': 'ok'})
+    token = request.headers.get('Authorization')
+    user_id = User.decode_token(token)
+    return make_response({'msg': 'ok', 'user_id': user_id})
 
 
 @app.route(route + '/follow', methods=['GET'])
