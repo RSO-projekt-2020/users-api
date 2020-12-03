@@ -1,20 +1,25 @@
 from flask import *
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
+from os import environ
 import jwt
 import datetime
+
 
 route = '/v1'
 app = Flask(__name__)
 
 #DB settings
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+"""
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://{user}:{passwd}@{host}:{port}/{db}'.format(
         user='dbuser',
         passwd='postgres',
         host='0.0.0.0',
         port='5432',
         db='user-db')
+"""
+app.config['SQLALCHEMY_DATABASE_URI'] = environ['DB_URI']
 db = SQLAlchemy(app)
 
 # TODO: load it from env file or server
