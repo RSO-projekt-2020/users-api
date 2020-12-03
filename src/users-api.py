@@ -32,12 +32,16 @@ class User(db.Model):
     user_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     email = db.Column(db.String)
     password_hash = db.Column(db.String)
+    n_followers = db.Column(db.Integer)
+    n_following = db.Columns(db.Integer)
     created_on = db.Column(db.String)
 
     def __init__(self, email, password):
         self.email = email
         self.password_hash = self.create_pwd_hash(password)
         self.created_on = str(datetime.datetime.utcnow())
+        self.n_followers = 0
+        self.n_following = 0
 
     def create_pwd_hash(self, password):
         pwd_hash = Bcrypt(app).generate_password_hash(password).decode('utf-8')
@@ -70,6 +74,8 @@ class User(db.Model):
     def to_dict(self):
         tmp = {'user_id': self.user_id,
                 'email': self.email,
+                'n_followers': self.n_followers,
+                'n_following': self.n_following,
                 'created_on': self.created_on}
         return tmp
 
@@ -142,7 +148,14 @@ def login_user():
     return make_response({'msg': 'Login successful', 'token': token})
 
 
-# to ne vem ce rabimo
+@app.route(route + '/user/<int:user_id>', methods=['GET'])
+def user_info(user_id):
+    user = User.query.filter_by(user_id=user_id).first()
+    if user is None:
+        return make_response({'msg': 'User does not exist!'})
+    return make_response(user.to_dict())
+
+
 @app.route(route + '/user/check', methods=['GET'])
 def check_token():
     token = request.headers.get('Authorization')
@@ -173,6 +186,13 @@ def follow_user(user_id):
     token = request.headers.get('Authorization')
     login_user = User.decode_token(token)
     relation = Relations(login_user, user_id) 
+
+    user_follower = User.query.filter_by(user_id=login_user).first()
+    user_follower.n_following += 1
+
+    user_followed = User.query.filter_by(user_id=user_id).first()
+    user_followed.n_followers += 1
+
     db.session.add(relation)
     db.session.commit()
     return make_response({'msg': 'ok'})
@@ -183,6 +203,13 @@ def unfollow_user(user_id):
     token = request.headers.get('Authorization')
     login_user = User.decode_token(token)
     db.session.query(Relations).filter(Relations.follower==login_user).filter(Relations.following==user_id).delete()
+    
+    user_follower = User.query.filter_by(user_id=login_user).first()
+    user_follower.n_following -= 1
+
+    user_followed = User.query.filter_by(user_id=user_id).first()
+    user_followed.n_followers -= 1
+    
     db.session.commit()
     return make_response({'msg': 'ok'})
     
