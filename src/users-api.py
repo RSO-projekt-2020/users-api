@@ -5,6 +5,11 @@ from os import environ
 import jwt
 import datetime
 
+# logging imports
+import logging
+from logstash_async.handler import AsynchronousLogstashHandler
+from logstash_async.handler import LogstashFormatter
+
 
 route = '/v1'
 app = Flask(__name__)
@@ -24,6 +29,34 @@ db = SQLAlchemy(app)
 
 # TODO: load it from env file or server
 app.config['SECRET_KEY'] = 'TOP-SECRET_KEY'
+
+# -------------------------------------------
+# Logging setup
+# -------------------------------------------
+# Create the logger and set it's logging level
+logger = logging.getLogger("logstash")
+logger.setLevel(logging.INFO)        
+
+log_endpoint_uri = environ["LOGS_URI"]
+log_endpoint_port = environ["LOGS_PORT"]
+
+
+# Create the handler
+handler = AsynchronousLogstashHandler(
+    host=log_endpoint_uri,
+    port=log_endpoint_port, 
+    ssl_enable=True, 
+    ssl_verify=False,
+    database_path='')
+
+# Here you can specify additional formatting on your log record/message
+formatter = LogstashFormatter()
+handler.setFormatter(formatter)
+
+# Assign handler to the logger
+logger.addHandler(handler)
+
+
 
 # models
 class User(db.Model):
@@ -122,6 +155,7 @@ def add_user():
     db.session.commit()
 
     token = user.authenticate(password)
+    logger.info("200 - OK")
 
     return make_response({'msg': 'Created new user.', 'token': token})
 
@@ -145,6 +179,7 @@ def login_user():
         # wrong password
         return make_response({'msg': 'Password is incorrect.'})
 
+    logger.info("200 - OK")
     return make_response({'msg': 'Login successful', 'token': token})
 
 
@@ -153,6 +188,7 @@ def user_info(user_id):
     user = User.query.filter_by(user_id=user_id).first()
     if user is None:
         return make_response({'msg': 'User does not exist!'})
+    logger.info("200 - OK")
     return make_response(user.to_dict())
 
 
@@ -162,6 +198,7 @@ def check_token():
     # checks if token is ok
     token = request.headers.get('Authorization')
     user_id = User.decode_token(token)
+    logger.info("200 - OK")
     return make_response({'msg': 'ok', 'user_id': user_id})
 
 
@@ -175,6 +212,7 @@ def get_relations():
     login_user = User.decode_token(token)
     followers = Relations.query.filter_by(following=login_user).all()
     following = Relations.query.filter_by(follower=login_user).all()
+    logger.info("200 - OK")
     return make_response({'msg': 'ok',
                         'followers': [{'user_id': x.follower} for x in followers],
                         'following':[{'user_id': x.following} for x in following]})
@@ -195,6 +233,7 @@ def follow_user(user_id):
 
     db.session.add(relation)
     db.session.commit()
+    logger.info("200 - OK")
     return make_response({'msg': 'ok'})
 
 
@@ -211,6 +250,7 @@ def unfollow_user(user_id):
     user_followed.n_followers -= 1
     
     db.session.commit()
+    logger.info("200 - OK")
     return make_response({'msg': 'ok'})
     
 

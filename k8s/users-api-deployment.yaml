@@ -21,6 +21,17 @@ spec:
                 secretKeyRef:
                   name: db-connection
                   key: db-connection-url-users-api
+            - name: LOGS_URI 
+              valueFrom:
+                secretKeyRef:
+                  name: log-connection 
+                  key: log-connection-url 
+            - name: LOGS_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: log-connection
+                  key: log-connection-port
+
           ports:
             - containerPort: 8080
               name: server
