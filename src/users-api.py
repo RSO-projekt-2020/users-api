@@ -37,8 +37,8 @@ app.config['SECRET_KEY'] = 'TOP-SECRET_KEY'
 logger = logging.getLogger("logstash")
 logger.setLevel(logging.INFO)        
 
-log_endpoint_uri = environ["LOGS_URI"]
-log_endpoint_port = environ["LOGS_PORT"]
+log_endpoint_uri = str(environ["LOGS_URI"]).strip()
+log_endpoint_port = int(environ["LOGS_PORT"].strip())
 
 
 # Create the handler
