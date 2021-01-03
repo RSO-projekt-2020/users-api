@@ -278,7 +278,14 @@ def unfollow_user(user_id):
     db.session.commit()
     logger.info("200 - OK")
     return make_response({'msg': 'ok'})
-    
+
+@app.route(route + '/break/please', methods=['GET'])
+def break():
+    global db
+    db = None
+    logger.info("200 - GONNA BREAK IT")
+    return make_response({'msg': "I broke it :'("})
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port='8080')
