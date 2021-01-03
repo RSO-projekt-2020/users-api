@@ -64,17 +64,25 @@ logger.addHandler(handler)
 # Healthcheck functions
 # -------------------------------------------
 health = HealthCheck()
+BREAKER = False
+
+def breaker_check():
+    global BREAKER
+    return not BREAKER, "broken"
+
 
 def db_connection_check():
     global db
     db.session.execute('SELECT * FROM users')
     return True, "db ok"
 
+
 def log_connection_check():
     global logger
     logger.info("200 - OK")
     return True, "logger ok"
 
+health.add_check(breaker_check)
 health.add_check(db_connection_check)
 health.add_check(log_connection_check)
 app.add_url_rule(route + "/health/ready", route + "health/ready", view_func=lambda: health.run())
@@ -281,8 +289,8 @@ def unfollow_user(user_id):
 
 @app.route(route + '/break/please', methods=['GET'])
 def breaker():
-    global db
-    db = None
+    global BREAKER
+    BREAKER = True
     logger.info("200 - GONNA BREAK IT")
     return make_response({'msg': "I broke it :'("})
 
