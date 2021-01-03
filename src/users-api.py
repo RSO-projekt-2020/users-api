@@ -280,7 +280,7 @@ def unfollow_user(user_id):
     return make_response({'msg': 'ok'})
 
 @app.route(route + '/break/please', methods=['GET'])
-def break():
+def breaker():
     global db
     db = None
     logger.info("200 - GONNA BREAK IT")
