@@ -10,11 +10,15 @@ import logging
 from logstash_async.handler import AsynchronousLogstashHandler
 from logstash_async.handler import LogstashFormatter
 
+# healthcheck imports
+from healthcheck import Healthcheck
 
 route = '/v1'
 app = Flask(__name__)
 
-#DB settings
+# -------------------------------------------
+# DB settings
+# -------------------------------------------
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 """
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://{user}:{passwd}@{host}:{port}/{db}'.format(
@@ -56,9 +60,29 @@ handler.setFormatter(formatter)
 # Assign handler to the logger
 logger.addHandler(handler)
 
+# -------------------------------------------
+# Healthcheck functions
+# -------------------------------------------
+health = Healthcheck()
 
+def db_connection_check():
+    global db
+    User.query.filter_by(email=email).first()
+    return True, "db ok"
 
-# models
+def log_connection_check():
+    global logger
+    logger.info("200 - OK")
+    return True, "logger ok"
+
+health.add_check(db_connection_check)
+health.add_check(log_connection_check)
+app.add_url_rule("/health/ready", "health/ready", view_func=lambda: health.run())
+app.add_url_rule("/health/live", "health/live", view_func=lambda: health.run())
+
+# -------------------------------------------
+# Models
+# -------------------------------------------
 class User(db.Model):
     __tablename__ = 'users'
 
@@ -132,7 +156,9 @@ class Relations(db.Model):
                 'following': self.following}
         return tmp
 
-# views
+# -------------------------------------------
+# Views
+# -------------------------------------------
 @app.route(route + '/user', methods=['POST'])
 def add_user():
     """
