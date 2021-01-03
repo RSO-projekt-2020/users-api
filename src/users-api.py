@@ -67,7 +67,7 @@ health = HealthCheck()
 
 def db_connection_check():
     global db
-    User.query.filter_by(email="").first()
+    db.session.execute('SELECT * FROM users')
     return True, "db ok"
 
 def log_connection_check():
