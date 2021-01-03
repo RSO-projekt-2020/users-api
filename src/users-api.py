@@ -77,8 +77,8 @@ def log_connection_check():
 
 health.add_check(db_connection_check)
 health.add_check(log_connection_check)
-app.add_url_rule("/health/ready", "health/ready", view_func=lambda: health.run())
-app.add_url_rule("/health/live", "health/live", view_func=lambda: health.run())
+app.add_url_rule(route + "/health/ready", route + "health/ready", view_func=lambda: health.run())
+app.add_url_rule(route + "/health/live", route + "health/live", view_func=lambda: health.run())
 
 # -------------------------------------------
 # Models
