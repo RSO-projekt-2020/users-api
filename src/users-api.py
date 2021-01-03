@@ -11,7 +11,7 @@ from logstash_async.handler import AsynchronousLogstashHandler
 from logstash_async.handler import LogstashFormatter
 
 # healthcheck imports
-from healthcheck import Healthcheck
+from healthcheck import HealthCheck
 
 route = '/v1'
 app = Flask(__name__)
@@ -63,7 +63,7 @@ logger.addHandler(handler)
 # -------------------------------------------
 # Healthcheck functions
 # -------------------------------------------
-health = Healthcheck()
+health = HealthCheck()
 
 def db_connection_check():
     global db
