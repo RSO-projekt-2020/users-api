@@ -79,8 +79,8 @@ def db_connection_check():
 
 def log_connection_check():
     global logger
-    logger.info("200 - OK")
     return True, "logger ok"
+
 
 health.add_check(breaker_check)
 health.add_check(db_connection_check)
@@ -229,10 +229,14 @@ def user_info(user_id):
 @app.route(route + '/user/check', methods=['GET'])
 def check_token():
     token = request.headers.get('Authorization')
+    request_id = None
+    if 'X-Request-ID' in request.headers:
+        request_id = request.headers.get('X-Request-ID')
+
     # checks if token is ok
     token = request.headers.get('Authorization')
     user_id = User.decode_token(token)
-    logger.info("200 - OK")
+    logger.info("200 - OK - id:" + request_id)
     return make_response({'msg': 'ok', 'user_id': user_id})
 
 
@@ -243,10 +247,14 @@ def get_relations():
     :return: json {followers: [], following: []}
     """
     token = request.headers.get('Authorization')
+    request_id = None
+    if 'X-Request-ID' in request.headers:
+        request_id = request.headers.get('X-Request-ID')
+
     login_user = User.decode_token(token)
     followers = Relations.query.filter_by(following=login_user).all()
     following = Relations.query.filter_by(follower=login_user).all()
-    logger.info("200 - OK")
+    logger.info("200 - OK - id:" + request_id)
     return make_response({'msg': 'ok',
                         'followers': [{'user_id': x.follower} for x in followers],
                         'following':[{'user_id': x.following} for x in following]})
