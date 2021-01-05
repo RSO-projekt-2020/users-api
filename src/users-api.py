@@ -167,7 +167,7 @@ class Relations(db.Model):
 # -------------------------------------------
 # Views
 # -------------------------------------------
-@app.route(route + '/user', methods=['POST'])
+@app.route(route + '/register', methods=['POST'])
 def add_user():
     """
     This method registers new user and returns authentication token. If the users alredy exists it returns an error.
@@ -194,7 +194,7 @@ def add_user():
     return make_response({'msg': 'Created new user.', 'token': token})
 
 
-@app.route(route + '/user', methods=['GET'])
+@app.route(route + '/user', methods=['POST'])
 def login_user():
     """
     This method logs in an existing user.
