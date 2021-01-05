@@ -5,3 +5,4 @@ pyjwt==1.4.2
 flask-bcrypt==0.7.1
 python-logstash-async==2.2.0
 py-healthcheck
+flask_cors
