@@ -221,10 +221,13 @@ def login_user():
 
 @app.route(route + '/user/<int:user_id>', methods=['GET'])
 def user_info(user_id):
+    request_id = None
+    if 'X-Request-ID' in request.headers:
+        request_id = request.headers.get('X-Request-ID')
     user = User.query.filter_by(user_id=user_id).first()
     if user is None:
         return make_response({'msg': 'User does not exist!'})
-    logger.info("200 - OK")
+    logger.info("200 - OK - id:" + request_id)
     return make_response(user.to_dict())
 
 
