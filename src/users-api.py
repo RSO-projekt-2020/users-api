@@ -16,7 +16,7 @@ from healthcheck import HealthCheck
 
 route = '/v1'
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app, resources={r"/v1/*": {"origins": "*"}})
 
 # -------------------------------------------
 # DB settings
