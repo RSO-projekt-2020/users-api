@@ -5,6 +5,7 @@ from flask_cors import CORS
 from os import environ
 import jwt
 import datetime
+import consul
 
 # logging imports
 import logging
@@ -32,6 +33,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://{user}:{passwd}@{
 """
 app.config['SQLALCHEMY_DATABASE_URI'] = environ['DB_URI']
 db = SQLAlchemy(app)
+consul_env = consul.Consul(host='azure-consul-server', port=8500)
 
 # TODO: load it from env file or server
 app.config['SECRET_KEY'] = 'TOP-SECRET_KEY'
@@ -202,6 +204,10 @@ def login_user():
     This method logs in an existing user.
     :return: json {'auth_token'}
     """
+    _, data = consul_env.kv.get('maintenance', index=None)
+    if int(data['Value'].decode('utf8')):
+        return make_response({'msg': "We are sorry, we are currently working on our site and it's temporary unavailable. Check again later!"})
+
     email = request.json['email']
     password = request.json['password']
 
