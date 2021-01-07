@@ -306,6 +306,17 @@ def unfollow_user(user_id):
     logger.info("[users-api] someone just lost a follower")
     return make_response({'msg': 'ok'})
 
+
+@app.route(route + '/search', methods=['GET'])
+def search():
+    query = request.args.get('q', default=None)
+    if query is None:
+        return make_response({'msg': 'empty query', 'content': []})
+    logger.info("[user-api] someone is querying for users like:" + str(query))
+    users = User.query.filter_by(email=User.email.like(query)).all()
+    return make_response({'msg': 'ok', 'content': [x.to_dict() for x in users]})
+
+
 @app.route(route + '/break/please', methods=['GET'])
 def breaker():
     global BREAKER
