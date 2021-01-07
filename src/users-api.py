@@ -182,7 +182,6 @@ def add_user():
     password = request.json['password']
 
     user = User.query.filter_by(email=email).first()
-    print(user)
     if user is not None:
         # User already exists
         return make_response({'msg': 'User already exists.'})
@@ -193,7 +192,7 @@ def add_user():
     db.session.commit()
 
     token = user.authenticate(password)
-    logger.info("200 - OK")
+    logger.info("[users-api] created new user")
 
     return make_response({'msg': 'Created new user.', 'token': token})
 
@@ -218,10 +217,11 @@ def login_user():
 
     token = user.authenticate(password)
     if token is None:
+        logger.info("[users-api] wrong password")
         # wrong password
         return make_response({'msg': 'Password is incorrect.'})
 
-    logger.info("200 - OK")
+    logger.info("[users-api] logged in user")
     return make_response({'msg': 'Login successful', 'token': token})
 
 
@@ -233,7 +233,7 @@ def user_info(user_id):
     user = User.query.filter_by(user_id=user_id).first()
     if user is None:
         return make_response({'msg': 'User does not exist!'})
-    logger.info("200 - OK - id:" + request_id)
+    logger.info("[users-api][{}] user info".format(request_id))
     return make_response(user.to_dict())
 
 
@@ -247,7 +247,7 @@ def check_token():
     # checks if token is ok
     token = request.headers.get('Authorization')
     user_id = User.decode_token(token)
-    logger.info("200 - OK - id:" + request_id)
+    logger.info("[users-api][{}] authorization token check".format(request_id))
     return make_response({'msg': 'ok', 'user_id': user_id})
 
 
@@ -265,7 +265,7 @@ def get_relations():
     login_user = User.decode_token(token)
     followers = Relations.query.filter_by(following=login_user).all()
     following = Relations.query.filter_by(follower=login_user).all()
-    logger.info("200 - OK - id:" + request_id)
+    logger.info("[users-api][{}] get followers".format(request_id))
     return make_response({'msg': 'ok',
                         'followers': [{'user_id': x.follower} for x in followers],
                         'following':[{'user_id': x.following} for x in following]})
@@ -286,7 +286,7 @@ def follow_user(user_id):
 
     db.session.add(relation)
     db.session.commit()
-    logger.info("200 - OK")
+    logger.info("[users-api] someone has a new follower")
     return make_response({'msg': 'ok'})
 
 
@@ -303,14 +303,14 @@ def unfollow_user(user_id):
     user_followed.n_followers -= 1
     
     db.session.commit()
-    logger.info("200 - OK")
+    logger.info("[users-api] someone just lost a follower")
     return make_response({'msg': 'ok'})
 
 @app.route(route + '/break/please', methods=['GET'])
 def breaker():
     global BREAKER
     BREAKER = True
-    logger.info("200 - GONNA BREAK IT")
+    logger.info("[users-api] GONNA BREAK IT")
     return make_response({'msg': "I broke it :'("})
 
 
